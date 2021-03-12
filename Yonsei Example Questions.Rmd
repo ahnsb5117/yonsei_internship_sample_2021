@@ -1,8 +1,8 @@
 ---
-title: "Yonsei Internship Summer 2021"
-author: "Sung Bum Ahn"
+title: "Yonsei Internship Sample 2021"
+author: "Sung Bum (Simon) Ahn"
 date: "3/10/2021"
-output: html_document
+output: pdf_document
 ---
 ```{r setup, include=FALSE}
 # Do not modify this chunk.
@@ -13,7 +13,6 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.retina 
 # Load the necessary packages
 library(tidyverse)
 library(pdxTrees)
-library(dplyr)
 library(infer)
 library(broom)
 ```
@@ -48,19 +47,22 @@ ggplot(data = four_parks, mapping = aes(x = Park)) +
   
 ```
 
-b. 
+b. Using the four parks dataset, select Genus and Common_Name to create a new dataset called "tree_name". Print "tree_name" to get a grade.
 ```{r}
-
+tree_name <- four_parks %>% 
+  select(c(Genus, Common_Name))
+tree_name
 ```
 
 
 
-c. Tally the condition of trees in these four parks. Tally them accordingly and print only Park, Condition and n on a table.
+c. Tally the condition of trees in these four parks. Tally them accordingly and print only Park, Condition and n on a table. Print "tree_name" to get a grade.
 
 ```{r}
 four_parks %>% 
   group_by(Park, Condition) %>% 
   tally()
+four_parks
 ```
 
 B. Medium difficulty questions
@@ -84,7 +86,6 @@ means <- aggregate(Tree_Height ~  Park, four_parks, mean)
 ggplot(data = four_parks, mapping = aes(x = Park, y= Tree_Height)) +
   geom_boxplot()  +
   geom_text(data = means, aes(label = round(Tree_Height, 1), y = Tree_Height + 0.1)) 
-            
 ```
 
 c.Generate a bootstrap distribution with Tree_Height and DBH (Diameter at Breast Height). Drop any NA values. Have repetitions of bootstrapping at 1000.
@@ -99,7 +100,7 @@ bootstrap_dist
 
 
 
-C. Hard difficulty questions
+C. Hard questions
 a. Using the 'four_parks' dataset, create a dataset called 'top3_park_op' with the two parks with the most “Douglas-Fir” trees. After this, change the name of “Douglas-Fir” to “Oregon Pine”. Do not remove n.  You will be assessed on the accuracy of “top3_park_op” data set.
 
 ```{r}
@@ -115,7 +116,7 @@ top2_park_op <- four_parks %>%
 ```
 
 
-b. Compute the ANOVA test statistic ($F_o$) for Tree_Height by Park in four_parks. and also produce an ANOVA table using 'aov()'. Now generate a simulation-based null distribution of the test statistics for Tree Heights, round up the intercept to the nearest tenth place. 
+b. Compute the ANOVA test statistic ($F_o$) for Tree_Height by Park in four_parks. and also produce an ANOVA table using 'aov()'. Now generate a simulation-based null distribution of the test statistics for Tree Heights, round up the xintercept to the nearest tenth place. 
 
 ```{r}
 th_four_parks <- four_parks %>%
@@ -137,8 +138,15 @@ visualize(null_dist_four_parks) +
   geom_vline(xintercept= 6.29)
 ```
 
-c. Want to display diff geom for diff dataset on same graph, bootstrap to measure a center. Single sample and resample and for each sample compute the mean and compute the median and plot the histogram and historgams are labels by a legend. 
+c. Facet each parks, and create a 
 ```{r}
+```{r}
+ggplot(pdx_precip_snow, aes(x = date, y = value, color = datatype )) +
+  geom_point()+
+  geom_smooth()+
+  labs(title = "Precipiation and Snowfall data for 2021", x = "Dates", y = "Amount Fell (mm)", color = "Type")+
+  scale_color_manual(values=c("#56B4E9", "blue"))
 
+```
 
 ```
