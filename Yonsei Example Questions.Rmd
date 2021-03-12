@@ -1,0 +1,144 @@
+---
+title: "Yonsei Internship Summer 2021"
+author: "Sung Bum Ahn"
+date: "3/10/2021"
+output: html_document
+---
+```{r setup, include=FALSE}
+# Do not modify this chunk.
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.retina = 2)
+```
+
+```{r}
+# Load the necessary packages
+library(tidyverse)
+library(pdxTrees)
+library(dplyr)
+library(infer)
+library(broom)
+```
+
+We are going to use data from the `pdxTrees` package. In particular, we will use the dataset called `four_parks` that I created below.
+
+Make sure to run the following R chunk.
+
+```{r}
+# Grab trees near Reed
+four_parks <- get_pdxTrees_parks(park = 
+                                  c("Brooklyn Park",
+                                          "Kenilworth Park",
+                                          "Eastmoreland Garden",
+                                          "Berkeley Park"))
+
+#Remove trees with no functional type
+four_parks <- drop_na(four_parks, Functional_Type)
+```
+
+
+A. Low difficulty questions
+
+
+a. Create a bar plot of `park`.
+
+Answer.
+```{r}
+# Bar plot
+ggplot(data = four_parks, mapping = aes(x = Park)) +
+  geom_bar()
+  
+```
+
+b. 
+```{r}
+
+```
+
+
+
+c. Tally the condition of trees in these four parks. Tally them accordingly and print only Park, Condition and n on a table.
+
+```{r}
+four_parks %>% 
+  group_by(Park, Condition) %>% 
+  tally()
+```
+
+B. Medium difficulty questions
+
+a. Find the tallest tree within the park, and give its tree height, common name, date of data collected (Inventory Date), and park name. 
+
+```{r}
+# Tallest tree data frame
+tallest <- four_parks %>%
+  filter(Tree_Height == max(Tree_Height)) %>%
+  select(Tree_Height, Common_Name, Inventory_Date, Park)
+# Print wrangled data frame
+tallest
+```
+
+b. Generate a boxplot that shows the tree heights by park. Make sure to calculate and include the mean of the tree height rounded to the tenth place on the graph. 
+
+```{r}
+means <- aggregate(Tree_Height ~  Park, four_parks, mean) 
+
+ggplot(data = four_parks, mapping = aes(x = Park, y= Tree_Height)) +
+  geom_boxplot()  +
+  geom_text(data = means, aes(label = round(Tree_Height, 1), y = Tree_Height + 0.1)) 
+            
+```
+
+c.Generate a bootstrap distribution with Tree_Height and DBH (Diameter at Breast Height). Drop any NA values. Have repetitions of bootstrapping at 1000.
+```{r}
+bootstrap_dist <- four_parks %>% 
+  drop_na(Tree_Height, DBH) %>% 
+  specify(Tree_Height ~ DBH) %>% 
+  generate(reps = 1000, type = "bootstrap") %>% 
+  calculate(stat = "correlation")
+bootstrap_dist
+```
+
+
+
+C. Hard difficulty questions
+a. Using the 'four_parks' dataset, create a dataset called 'top3_park_op' with the two parks with the most “Douglas-Fir” trees. After this, change the name of “Douglas-Fir” to “Oregon Pine”. Do not remove n.  You will be assessed on the accuracy of “top3_park_op” data set.
+
+```{r}
+top2_park_op <- four_parks %>%
+  group_by(Park) %>% 
+  count(Common_Name) %>% 
+  filter(Common_Name == "Douglas-Fir") %>% 
+  arrange(desc(n)) %>%
+  ungroup() %>% 
+  slice_head(n = 2) %>% 
+  mutate(Common_Name = case_when(Common_Name == "Douglas-Fir" ~ "Oregon Pine",
+                                 TRUE ~ as.character(Common_Name)))
+```
+
+
+b. Compute the ANOVA test statistic ($F_o$) for Tree_Height by Park in four_parks. and also produce an ANOVA table using 'aov()'. Now generate a simulation-based null distribution of the test statistics for Tree Heights, round up the intercept to the nearest tenth place. 
+
+```{r}
+th_four_parks <- four_parks %>%
+  specify(Tree_Height ~ Park) %>%
+  calculate(stat = "F") 
+th_four_parks
+
+mod <- aov(Tree_Height ~ Park, data = four_parks)
+tidy(mod)
+
+null_dist_four_parks <- four_parks %>%
+  specify(Tree_Height ~ Park) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "F") 
+null_dist_four_parks
+
+visualize(null_dist_four_parks) +
+  geom_vline(xintercept= 6.29)
+```
+
+c. Want to display diff geom for diff dataset on same graph, bootstrap to measure a center. Single sample and resample and for each sample compute the mean and compute the median and plot the histogram and historgams are labels by a legend. 
+```{r}
+
+
+```
